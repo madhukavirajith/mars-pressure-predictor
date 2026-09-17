@@ -93,6 +93,13 @@ def load_model_and_preprocessing():
     model        = joblib.load('model_FINAL.pkl')
     imputer      = joblib.load('imputer.pkl')
     feature_cols = joblib.load('feature_cols.pkl')
+    
+    # Ensure cross-version compatibility for SimpleImputer
+    if hasattr(imputer, '_fit_dtype') and not hasattr(imputer, '_fill_dtype'):
+        imputer._fill_dtype = imputer._fit_dtype
+    if hasattr(imputer, '_fill_dtype') and not hasattr(imputer, '_fit_dtype'):
+        imputer._fit_dtype = imputer._fill_dtype
+        
     return model, imputer, feature_cols
 
 try:
@@ -107,6 +114,10 @@ except Exception as e:
 
 def predict_pressure(input_values):
     input_df = pd.DataFrame([input_values], columns=feature_cols)
+    if hasattr(imputer, '_fit_dtype') and not hasattr(imputer, '_fill_dtype'):
+        imputer._fill_dtype = imputer._fit_dtype
+    if hasattr(imputer, '_fill_dtype') and not hasattr(imputer, '_fit_dtype'):
+        imputer._fit_dtype = imputer._fill_dtype
     input_imputed = imputer.transform(input_df)
     prediction = model.predict(input_imputed)[0]
     return float(prediction)
